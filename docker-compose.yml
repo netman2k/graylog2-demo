@@ -1,0 +1,132 @@
+# References:
+# - https://docs.docker.com/compose/compose-file/compose-file-v2/
+# - https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html
+version: '2.2'
+services:
+  # ElasticSearch Master nodes
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-5.6.9}
+    volumes:
+      - ./elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      cluster.name: ${ES_CLUSTER_NAME:-elastic_cluster}
+      node.data: "false"
+      discovery.zen.minimum_master_nodes: 1
+      MAX_LOCKED_MEMORY: unlimited
+      xpack.security.enabled: 'false'
+      xpack.monitoring.enabled: 'false'
+      xpack.watcher.enabled: 'false'
+      xpack.ml.enabled: 'false'
+      bootstrap.memory_lock: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - 9200
+      - 9300
+    scale: 1
+    networks:
+      svc:
+      es:
+  # ElasticSearch data nodes
+  elasticsearch-data:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-5.6.9}
+    volumes:
+      - ./elastic/elasticsearch-data.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      cluster.name: ${CLUSTER_NAME:-elastic_cluster}
+      node.master: "false"
+      node.ingest: "false"
+      discovery.zen.minimum_master_nodes: 1
+      MAX_LOCKED_MEMORY: unlimited
+      xpack.security.enabled: 'false'
+      xpack.monitoring.enabled: 'false'
+      xpack.watcher.enabled: 'false'
+      xpack.ml.enabled: 'false'
+      bootstrap.memory_lock: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - 9200
+      - 9300
+    scale: 1
+    networks:
+      es:
+  kibana:
+    image: kibana:${TAG:-5.6.9}
+    ports:
+      - 5601:5601
+    networks:
+      es:
+  cerebro:
+    image: yannart/cerebro:latest
+    ports:
+      - 9100:9000
+    networks:
+      es:
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongodb:
+    image: mongo:3
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      svc:
+  graylog:
+    image: graylog2/server:${GRAYLOG_VERSION:-2.4.6-1}
+    volumes:
+      - ./graylog2/graylog.conf:/usr/share/graylog/data/config/graylog.conf
+      - ./graylog2/GeoLite2-City/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb
+    environment:
+      - TZ=${GRAYLOG_TZ:-Asia/Seoul}
+      - GRAYLOG_ROOT_TIMEZONE=${GRAYLOG_TZ:-Asia/Seoul}
+      - GRAYLOG_IS_MASTER=true
+      # CHANGE ME! 
+      # Use pwgen -N 1 -s 48
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET:-HalWOabaZewE6O4YuHo63wvLP9cBqCmUDV9SMTQ8uTuiCtsl}
+      # CHANGE ME! Use echo -n yourpassword | shasum -a 256
+      # Default Password: admin, 
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD:-8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918}
+      - GRAYLOG_ELASTICSEARCH_CLUSTER_NAME=${ES_CLUSTER_NAME:-elastic_cluster}
+      - GRAYLOG_ELASTICSEARCH_HOSTS=${GRAYLOG_ES_HOSTS:-http://elasticsearch:9200}
+      #- GRAYLOG_WEB_ENDPOINT_URI=http://logman.example.com:9000/api
+    networks:
+      svc:
+    links:
+      - mongodb:mongo
+    depends_on:
+      - mongodb
+      - elasticsearch
+    ports:
+      # Graylog web interface and REST API
+      - 9000:9000
+      # Syslog TCP
+      - 514:514
+      # Beats
+      - 5044:5044
+      # Syslog UDP
+      - 514:514/udp
+      # GELF TCP
+      - 12201:12201
+      # GELF UDP
+      - 12201:12201/udp
+
+volumes:
+  mongo_data:
+    driver: local
+networks:
+  svc:
+  es:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1
+
