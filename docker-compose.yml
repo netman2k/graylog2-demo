@@ -117,6 +117,7 @@ services:
       - GRAYLOG_WEB_ENDPOINT_URI=http://${HOST_IP}:9000/api
     networks:
       svc:
+      es:
     links:
       - mongodb:mongo
       - zookeeper:zookeeper
