@@ -1,26 +1,26 @@
-# About this repository
-Docker Compose 를 통하여 ElasticSearch / MongoDB / Graylog2 클러스터를 구성하는 방법을 기록하는 저장소
+# About
+Docker Compose 를 통하여 Graylog2 기능을 확인하고자 할 때 사용
 
-# How to
+# Component
 
-## System setting
+ ![1541819026824](assets/1541819026824.png)
+
+# Preparation
+
+## OS setting
 ### vm.max_map_count 증가
-다음 설정을 적용하지 않을 경우, 컨테이너가 실행되지 않을 수 있으니 설정을 반드시 한다.
-자세한 사항은 Reference Document를 참조한다.
+다음 설정을 적용하지 않을 경우, 컨테이너가 실행되지 않을 수 있으니 반드시 설정할 수 있도록 한다. 자세한 사항은 [Reference Document](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html)를 참조할 것.
 ```
 cat <<EOF > /etc/sysctl.d/20-vm-max-map-count.conf 
-# https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html
 vm.max_map_count=262144
 sysctl -p
 ```
 
-## Preparation
-### MaxMind GeoLite2 Database
+## MaxMind GeoLite2 Database
 
-IP의 위치 정보를 사용하기 위해 다음 URL에서 GeoLite2 City Database를 다운로드 받은 후 graylog2/GeoLite2-City 디렉토리에
-GeoLite2-City.mmdb 파일을 위치 시킨다.
+Graylog2에서 IP의 위치 정보를 사용하기 위해 다음 URL에서 GeoLite2 City Database를 다운로드 받은 후 graylog2/GeoLite2-City 디렉토리에 GeoLite2-City.mmdb 파일을 위치 시킨다.
 
-* https://dev.maxmind.com/geoip/geoip2/geolite2/
+* [다운로드 링크](https://dev.maxmind.com/geoip/geoip2/geolite2/)
 
 ```
 wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz -O GeoLite2-City.tar.gz
@@ -28,6 +28,7 @@ tar zxvf GeoLite2-City.tar.gz --strip 1 -C ./graylog2/GeoLite2-City
 ```
 
 ## Start containers
+docker compose 파일에는 Graylog2를 기동시키기위한 최소 설정이 들어있다.
 다음 커맨드는 ElasticSearch 2 master nodes, 1 data node, Kibana, Cerebro를 기동시킨다.
 ```
 docker-compose up -d
