@@ -23,8 +23,8 @@ Graylog2에서 IP의 위치 정보를 사용하기 위해 다음 URL에서 GeoLi
 * [다운로드 링크](https://dev.maxmind.com/geoip/geoip2/geolite2/)
 
 ```
-wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz -O GeoLite2-City.tar.gz
-tar zxvf GeoLite2-City.tar.gz --strip 1 -C ./graylog2/GeoLite2-City
+wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz -O /tmp/GeoLite2-City.tar.gz
+tar zxvf /tmp/GeoLite2-City.tar.gz --strip 1 -C ./graylog2/GeoLite2-City
 ```
 
 ## Start containers
@@ -35,16 +35,12 @@ docker-compose up -d
 ```
 
 ## Scaling ElasticSearch
-### ElasticSearch Master node scaling
-다음 명령은 ElasticSearch master노드를 3개까지 증가시킨다.
+### Elasticsearch node scaling
+다음 명령은 Elasticsearch 노드를 3개까지 증가시킨다.
 ```
 docker-compose up --scale elasticsearch=3
 ```
-### ElasticSearch data node scaling
-다음 명령은 ElasticSearch data 노드를 3개까지 증가시킨다.
-```
-docker-compose up --scale elasticsearch-data=3
-```
+
 ## Kibana 접속 정보
 - http://localhost:5601
 
