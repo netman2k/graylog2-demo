@@ -114,8 +114,7 @@ services:
       - ./env/graylog
     environment:
       - GRAYLOG_IS_MASTER=true
-      # If you want to map your graylog2 with a specific domain, uncomment and edit the domain name
-      #- GRAYLOG_WEB_ENDPOINT_URI=http://logman.example.com:9000/api
+      - GRAYLOG_WEB_ENDPOINT_URI=${GRAYLOG_WEB_ENDPOINT_URI}
     networks:
       svc:
     links:
