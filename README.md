@@ -1,8 +1,10 @@
-# About
+[TOC]
+
+# 1. 개요
 
 본 저장소는 Graylog2를 통한 통합 로그 수집 시스템 구현 예제를 포함하고 있다.
 
-# 기본 시스템 구성 
+# 2. 기본 시스템 구성 
 
  다음의 링크는 각각 시스템 구성에 필요한 항목들을 설명하고 있으니  자신의 목적에 맞는 형태를 선택하여 필요한 시스템 구성을 진행한다.
 
@@ -17,16 +19,19 @@
 >
 > 진행을 위해서는 최소 3대의 Swarm node가 필요하다. 
 
-# 각 서비스 설정
+# 3. 각 서비스 설정
 
-다음 항목들은 기본 시스템이 구성되었다는 가정하에 진행되어진다.
-위 방식으로 필요 서비스들을 구동하였다면 로그 수집 시스템이라는 목적을 이루기위해  각 서비스에 필요한 설정을 해주어야 한다.
+> 아래 모든 내용은 "1. [Docker compose를 통한 구성 방법](./docs/docker-compose.md)"로 구성되었다는 가정하에 진행되어진다.
 
-여기서 설정하려는 시스템은 아래 그림과 같이 Ingest인 Logstash와 Graylog2가 Apache Kafka를 메시지 버퍼(?)로 사용하는데, 이를 위해서는 몇가지 과정을 거쳐야한다.
+이제 우리는 로그 수집 시스템 구축을 목적으로 각 설정을 진행하도록 하겠다.
+
+구현하려는 시스템은 아래 그림과 같이 Ingest인 Logstash와 Graylog2 서비스가 Apache Kafka를 메시지 버퍼로 사용하도록 되어질 것이다. 
+
+이를 기억하고 다음 과정으로 넘어가도록 한다.
 
 ![log_system_structure](./docs/assets/1541819026824.png)
 
-## 1. Apache Kafka 클러스터  
+## 3.1. Apache Kafka 클러스터  
 
 Logstash는 유입된 syslog 데이터를 Apach Kafka의 syslog 토픽(Topic)에 전달하도록 설정되어져있다. 따라서 Apach Kafka에 필요한 토픽을 생성해주어야한다.
 
@@ -49,9 +54,9 @@ bash-4.4# JMX_PORT= /opt/kafka/bin/kafka-topics.sh --create --zookeeper=$KAFKA_Z
 Created topic "syslog".
 ```
 
-### Kafka-manager를 통한 토픽 생성
+### 3.2 Kafka-manager를 통한 토픽 생성
 
-#### 1. 클러스터(Cluster) 생성
+#### 3.2.1. 클러스터(Cluster) 생성
 kafka-manager를 통하여 토픽을 생성하기위해서는 먼저 클러스터를 생성해 주어야 한다.
 
 ![list_cluster](./docs/assets/1541836461715.png)
@@ -62,7 +67,7 @@ kafka-manager를 통하여 토픽을 생성하기위해서는 먼저 클러스�
 
 ![1541836496182](./docs/assets/1541836496182.png)
 
-#### 2. 토픽(Topic) 생성
+#### 3.2.2. 토픽(Topic) 생성
 클러스터가 생성되었다면 이제 토픽을 생성해야한다.
 먼저 생성된 클러스터를 선택하고 해당 메뉴를 클릭하여 토픽을 생성한다.
 
@@ -72,7 +77,7 @@ kafka-manager를 통하여 토픽을 생성하기위해서는 먼저 클러스�
 
 ![topic_detail](./docs/assets/1541837837201.png)
 
-## 2. Logstash 재기동
+## 3.2. Logstash 재기동
 실질적으로 Logstash는 문제 발생 시 데몬이 자동으로 재시도하도록 되어 특별히 이 항목을 수행할 필요가 없으다. 하지만 만일 문제가 발생하거나 특별한 경우 다음과 같이 재기동가능하다.
 
 * Docker compose
@@ -85,7 +90,7 @@ docker-compose restart logstash
 docker service update --force logstash_logstash
 ```
 
-## 3. Graylog2 설정
+## 3.3. Graylog2 설정
 
 Graylog2는 syslog로 직접 로그 메시지를 받을 수 있다. 하지만 시스템이 다운되거나 비정상적  동작 시 데이터 유실의 염려가 있기때문에 Ingest와 Graylog2 사이에 고가용성이 확보되는 Apache Kafka와 같은 메시지 버퍼 시스템을 사용할 수 있다. 
 
@@ -106,28 +111,40 @@ Graylog2는 컨텐츠팩(Content Pack)이라 부르는 JSON형태의 파일을 �
 
 ![message_flow](./docs/assets/1541841798919.png)
 
-### 1. Input 설정
+### 3.3.1. Input 설정
 
 
 
-### 2. Filter 설정
+서두에서 
+
+### 3.3.2. Filter 설정
 
 
 
-###3. Output 설정
+###3.3.3. Output 설정
+
+
+### 3.3.4. Index model
+http://docs.graylog.org/en/2.4/pages/configuration/index_model.html
+
+### 3.3.5. Content Pack 에 대하여 
+
+http://docs.graylog.org/en/2.4/pages/sending_data.html#content-packs
 
 
 
-### 4. Content Pack 에 대하여
 
 
 
+# 4. 로그 전송 설정
 
-
-
-
-## 4. 로그 전송 설정
+http://docs.graylog.org/en/2.4/pages/sending_data.html#sending-syslog-from-linux-hosts
 
 지금부터 syslog를 수집할 수 있는 기반이 마련되었으니 이제 수집을 원하는 시스템으로부터 로그를 받을 있도록 설정을 하면된다.
 
-# 
+# 5. 모니터링 구현
+
+
+# 6. 백업
+http://docs.graylog.org/en/2.4/pages/configuration/backup.html
+
