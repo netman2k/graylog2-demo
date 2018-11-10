@@ -1,9 +1,8 @@
 # Elasticsearch environment
-cluster.name="elastic_cluster"
-discovery.zen.minimum_master_nodes="1"
-MAX_LOCKED_MEMORY="unlimited"
-xpack.security.enabled="false"
-xpack.monitoring.enabled="false"
-xpack.watcher.enabled="false"
-xpack.ml.enabled="false"
-bootstrap.memory_lock="true"
+cluster.name=elastic_cluster
+MAX_LOCKED_MEMORY=unlimited
+xpack.security.enabled=false
+xpack.monitoring.enabled=false
+xpack.watcher.enabled=false
+xpack.ml.enabled=false
+bootstrap.memory_lock=true
