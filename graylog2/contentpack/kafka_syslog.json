@@ -9,7 +9,7 @@
         "topic_filter": "^syslog$",
         "fetch_wait_max": 100,
         "offset_reset": "largest",
-        "zookeeper": "zoo1:2181,zoo2:2181,zoo3:2181",
+        "zookeeper": "zookeeper:2181",
         "throttling_allowed": true,
         "fetch_min_bytes": 5,
         "threads": 2,
