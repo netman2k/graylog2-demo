@@ -1,0 +1,23 @@
+{
+  "id": "5be96992d56cac0001f256df",
+  "title": "Access log",
+  "description": "Access log index set",
+  "index_prefix": "accesslog",
+  "shards": 8,
+  "replicas": 1,
+  "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategy",
+  "rotation_strategy": {
+    "type": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategyConfig",
+    "rotation_period": "P1D"
+  },
+  "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+  "retention_strategy": {
+    "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+    "max_number_of_indices": 28
+  },
+  "index_analyzer": "standard",
+  "index_optimization_max_num_segments": 1,
+  "index_optimization_disabled": false,
+  "writable": true,
+  "default": false
+}
