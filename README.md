@@ -111,38 +111,95 @@ Graylog2는 컨텐츠팩(Content Pack)이라 부르는 JSON형태의 파일을 �
 
 ![message_flow](./docs/assets/1541841798919.png)
 
-### 3.3.1. Input 설정
-
-설정된 시스템은 먼저 Logstash에서 514포트로 유입된 메시지를 1차 처리하여 각각의 필드(field)로 변환한 후 이를 Apache Kafka의 syslog 토픽으로 전송한다. 이 때 전송된 로그는 JSON 형태의 평문(Plain text)으로 해당 토픽 저장된다.
-
-이제 Graylog2의 Input 설정을 통하여 Apache Kafka의 syslog 토픽에서 가져오는 설정이 필요하다.
-
-![system_menu](assets/1542021805604.png)
-
- 
-
- 
-
-
-
-### 3.3.2. Filter 설정
-
-
-
-###3.3.3. Output 설정
-
-
-### 3.3.4. Index model
-http://docs.graylog.org/en/2.4/pages/configuration/index_model.html
-
-### 3.3.5. Content Pack 에 대하여 
-
+### 3.3.1. Content Pack을 통한 기본 설정 
 http://docs.graylog.org/en/2.4/pages/sending_data.html#content-packs
 
+Graylog2 는 각각의 설정들을 하나의 파일로 배포할 수 있는 기능을 제공하는데, 이를 Content pack이라 부른다.
 
+Content pack 파일은 JSON 포맷을 통해 설정되어지며 다음과 같은 형태를 가진다. 
 
+```
+{
+  "name": "Sample",
+  "description": "Sample Content pack",
+  "category": "Linux",
+  "inputs": [],
+  "streams": [],
+  "outputs": [],
+  "dashboards": [],
+  "grok_patterns": [],
+  "lookup_tables": [],
+  "lookup_caches": [],
+  "lookup_data_adapters": []
+}
 
+```
 
+위 여러 단계의 작업을 쉽게 구현하기위해 본 저장소에서는 이미 동작가능한 content pack 파일을 포함하고 있다.
+
+* graylog2/contentpack/kafka_syslog.json
+
+이 파일을 열어보면 위와 같은 구조로 되어있는데 이는 위 그림에서 보인 우리의 목표를 달성하기위한 대부분의 들어있다.
+
+이 단계에서는 웹 인터페이스를 이용하지 않고 간단히 Content pack 적용할 수 있는 스크립트를 통하여 Graylog2에 설정할 것이다. 
+
+이제 다음과 같이 실행하도록 한다.
+
+```bash
+./graylog2/scripts/upload_contentpack.sh ./graylog2/contentpack/kafka_syslog.json
+```
+
+> 위 명령을 수행하기 위해서는 jq 커맨드가 필요하다. 
+
+성공적으로 명령이 수행되었다면 `Applied contentpack` 이라는 문구가 표시될 것이다. 그러면 Graylog2에도 다음과 같은 화면을 표시할 것이다.
+
+![Streams](docs/assets/1542023223221.png)
+
+이 Content pack은 다음과 같은 설정이 포함되어있다.
+
+* Apache Kafka의 syslog 토픽으로부터 메시지 풀링
+* 가져온 메시지로부터 필요한 필드 추출 및 생성
+* 특정 Stream rule을 기반으로하는 Stream rule 생성
+* 특정 검색 쿼리를 통한 대시보드 생성
+
+자세한 사항은 Content pack 코드 혹은 웹 인터페이스를 통하여 확인하도록 한다.
+
+### 3.3.2. Index model 생성 및 적용
+http://docs.graylog.org/en/2.4/pages/configuration/index_model.html
+
+아직까지는 Content pack으로는 Index model을 생성할 수 없는 관계로 API나 웹 인터페이스를 통하여 설정해야 한다.
+
+이번에도 역시 웹 인터페이스 대신 스크립트를 통하여 Graylog2에 설정할 것이다. 
+
+```
+./graylog2/scripts/upload_indexset.sh graylog2/indices/accesslog.json 
+```
+
+정상적으로 업로드가 되었다면 `Applied contentpack` 메시지가 출력될 것이다.
+
+이제 웹 인터페이스로 들어가 index set을 확인해 본다
+
+![indices](docs/assets/1542023935362.png)
+
+![indices_list](docs/assets/1542023998482.png)
+
+위와 같이 Default index set과 새로 생성한 Access log 라는 index set이 설정되어있는 것을 확인할 수 있다. 
+
+### 3.3.3. Stream의 index set 설정
+
+로그 관리 시 중요 로그는 일반 로그와 달리 더욱 오래 보관해야하거나 유실로부터 특히 유의해야하는 경우가 생기게 된다. 이를 Graylog2에서는 위의 index set을 통하여 이를 구현할 수 있다.
+
+조금 전 생성한 Access log 는 기본 Default index set 에 비하여 보관 주기와 복제수가 높게 설정되어있다. 이를 User/Group Operation이라는 스트림에 설정해보도록 한다.
+
+웹 인터페이스를 통하여 설정할 경우 다음과 같다.
+
+![Edit stream](docs/assets/1542026320463.png)
+
+![edit_stream_index_set](docs/assets/1542026331610.png)
+
+![result](docs/assets/1542026363348.png)
+
+위 결과와 같이 User/Group Operations는 다른 로그 보관 주기 및 보제수로 로그가 저장되게된다.
 
 # 4. 로그 전송 설정
 
@@ -150,9 +207,12 @@ http://docs.graylog.org/en/2.4/pages/sending_data.html#sending-syslog-from-linux
 
 지금부터 syslog를 수집할 수 있는 기반이 마련되었으니 이제 수집을 원하는 시스템으로부터 로그를 받을 있도록 설정을 하면된다.
 
+rsyslog를 로그 데몬으로 사용할 경우 간단히 /etc/rsyslog.conf 에 다음라인 추가로 원하는 목적을 이룰 수 있다.
+
+```
+*.*							@<IP or Domain FQDN>
+```
+
 # 5. 모니터링 구현
 
-
-# 6. 백업
-http://docs.graylog.org/en/2.4/pages/configuration/backup.html
-
+별도 페이지를 통해 추후 업데이트 예정
