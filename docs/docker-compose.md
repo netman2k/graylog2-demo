@@ -29,15 +29,14 @@ tar zxvf /tmp/GeoLite2-City.tar.gz --strip 1 -C ./graylog2/GeoLite2-City
 
 ## Start containers
 ### GRAYLOG2 Web listen URI
-내부적으로 `GRAYLOG_WEB_ENDPOINT_URI=http://${HOST_IP}:9000/api`가 설정되어있는데, 이 값에 넘겨줄 호스트의 IP 정보를 얻은 후 `docker-compose up` 을 실행시켜 서비스를 구동시킨다.
 
-```bash
-HOST_IP=$(ip addr show $(/sbin/ip route | awk '/default/ { print $5 }') | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
+bootstrap.sh는 내부적으로 `GRAYLOG_WEB_ENDPOINT_URI=http://${HOST_IP}:9000/api`가 설정되어있는데, 이 값에 넘겨줄 호스트의 IP 정보를 얻은 후 `docker-compose up` 을 실행시켜 서비스를 구동시킨다.
+
+```
+./bootstrap.sh
 ```
 
-```bash
-docker-compose up
-```
+
 
 ## 관리 도구
 

@@ -113,9 +113,17 @@ Graylog2는 컨텐츠팩(Content Pack)이라 부르는 JSON형태의 파일을 �
 
 ### 3.3.1. Input 설정
 
+설정된 시스템은 먼저 Logstash에서 514포트로 유입된 메시지를 1차 처리하여 각각의 필드(field)로 변환한 후 이를 Apache Kafka의 syslog 토픽으로 전송한다. 이 때 전송된 로그는 JSON 형태의 평문(Plain text)으로 해당 토픽 저장된다.
+
+이제 Graylog2의 Input 설정을 통하여 Apache Kafka의 syslog 토픽에서 가져오는 설정이 필요하다.
+
+![system_menu](assets/1542021805604.png)
+
+ 
+
+ 
 
 
-서두에서 
 
 ### 3.3.2. Filter 설정
 
