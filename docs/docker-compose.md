@@ -12,7 +12,7 @@ Docker Compose 를 통하여 Graylog2 기능을 확인하고자 할 때 사용
 
 # 2. 구성
 
-## 2.1. OS setting
+## 2.1. OS 설정
 ### vm.max_map_count 증가
 다음 설정을 적용하지 않을 경우, 컨테이너가 실행되지 않을 수 있으니 반드시 설정할 수 있도록 한다. 자세한 사항은 [Reference Document](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html)를 참조할 것.
 ```bash
@@ -65,14 +65,4 @@ Graylog2의 시각화의 단점을 보완하기위해 Kibana를 사용할 수 �
 다음 명령을 사용하면 사용중인 모든 컨테이너 및 볼륨들을 삭제한다.
 ```bash
 docker-compose down -v
-```
-
-# 5. 기타사항
-
-## 5.1. Elasticsearch 서비스 스케일링 업/다운
-
-`docker compose up --scale` 명령으로 Elasticsearch 의 replica 수를 조정할 수 있다.
-다음 명령은 Elasticsearch 노드를 3개까지 증가시킨다.
-```bash
-docker-compose up --scale elasticsearch=3
 ```
