@@ -212,7 +212,3 @@ rsyslog를 로그 데몬으로 사용할 경우 간단히 /etc/rsyslog.conf 에 
 ```
 *.*							@<IP or Domain FQDN>
 ```
-
-# 5. 모니터링 구현
-
-별도 페이지를 통해 추후 업데이트 예정
