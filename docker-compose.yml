@@ -116,6 +116,7 @@ services:
       svc:
       es:
     links:
+      - elasticsearch:elasticsearch
       - mongodb:mongo
       - zookeeper:zookeeper
       - kafka:kafka
