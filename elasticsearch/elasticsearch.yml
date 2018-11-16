@@ -3,7 +3,7 @@ transport.host: 0.0.0.0
 # for testing purpose
 discovery.zen.minimum_master_nodes: 1
 
-cluster.name: prod_es_cluster
+cluster.name: elastic_cluster
 node.master: true
 node.data: false
 discovery.zen.ping_timeout: 10s
