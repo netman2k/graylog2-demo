@@ -17,7 +17,7 @@
       },
       "static_fields": {},
       "type": "org.graylog2.inputs.raw.kafka.RawKafkaInput",
-      "global": false,
+      "global": true,
       "extractors": [
         {
           "title": "User Created",
