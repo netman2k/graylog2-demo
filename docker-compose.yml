@@ -1,5 +1,4 @@
 # References:
-# - https://docs.docker.com/compose/compose-file/compose-file-v2/
 # - https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html
 version: '3.0'
 services:
@@ -7,8 +6,6 @@ services:
     image: docker.elastic.co/logstash/logstash:5.6.10
     environment:
       TZ: Asia/Seoul
-    networks:
-      svc:
     ports:
       - "514:5000"
       - "514:5000/udp"
@@ -20,8 +17,6 @@ services:
 
   zookeeper:
     image: zookeeper:3.4
-    networks:
-      svc:
 
   kafka:
     image: wurstmeister/kafka:2.11-1.1.1
@@ -33,12 +28,12 @@ services:
       KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka -Dcom.sun.management.jmxremote.rmi.port=1099"
       JMX_PORT: 1099
     links:
-      - zookeeper:zookeeper
+      - zookeeper
+    ports:
+      - 9092:9092
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - kafka:/kafka
-    networks:
-      - svc
     depends_on:
       - zookeeper
 
@@ -48,12 +43,10 @@ services:
       ZK_HOSTS: "zookeeper:2181"
       APPLICATION_SECRET: "@dminP@ssw0rd"
     links:
-      - zookeeper:zookeeper
-      - kafka:kafka
+      - zookeeper
+      - kafka
     ports:
      - 9009:9000
-    networks:
-      svc:
     depends_on:
       - kafka
 
@@ -61,6 +54,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-5.6.9}
     volumes:
       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - esdata1:/usr/share/elasticsearch/data
     env_file:
       - ./env/elasticsearch
     environment:
@@ -70,10 +64,25 @@ services:
         soft: -1
         hard: -1
     ports:
-      - 9200
-      - 9300
+      - 9200:9200
+      - 9300:9300
     networks:
-      svc:
+      es:
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-5.6.9}
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - esdata2:/usr/share/elasticsearch/data
+    env_file:
+      - ./env/elasticsearch
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
       es:
 
   kibana:
@@ -94,12 +103,12 @@ services:
     depends_on:
       - elasticsearch
 
-  mongodb:
+  mongo:
     image: mongo:3
+    networks:
+      mongo:
     volumes:
       - mongo_data:/data/db
-    networks:
-      svc:
 
   graylog:
     image: graylog2/server:${GRAYLOG_VERSION:-2.4.6-1}
@@ -113,15 +122,15 @@ services:
       - GRAYLOG_IS_MASTER=true
       - GRAYLOG_WEB_ENDPOINT_URI=http://${HOST_IP}:9000/api
     networks:
-      svc:
       es:
+      mongo:
     links:
-      - elasticsearch:elasticsearch
-      - mongodb:mongo
-      - zookeeper:zookeeper
-      - kafka:kafka
+      - elasticsearch
+      - mongo
+#      - zookeeper
+#      - kafka
     depends_on:
-      - mongodb
+      - mongo
       - elasticsearch
     ports:
       # Graylog web interface and REST API
@@ -136,8 +145,8 @@ services:
 volumes:
   mongo_data:
   kafka:
-
+  esdata1:
+  esdata2:
 networks:
-  svc:
   es:
-
+  mongo:

@@ -1,5 +1,5 @@
 # Elasticsearch environment
-cluster.name=elastic_cluster
+cluster.name=graylog
 MAX_LOCKED_MEMORY=unlimited
 xpack.security.enabled=false
 xpack.monitoring.enabled=false
