@@ -12,11 +12,15 @@ services:
     volumes:
       - ./logstash/settings/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/pipeline/syslog-kafka.conf:/usr/share/logstash/pipeline/syslog.conf
+    networks:
+      backend:
     depends_on:
       - kafka
 
   zookeeper:
     image: zookeeper:3.4
+    networks:
+      backend:
 
   kafka:
     image: wurstmeister/kafka:2.11-1.1.1
@@ -29,6 +33,8 @@ services:
       JMX_PORT: 1099
     links:
       - zookeeper
+    networks:
+      backend:
     ports:
       - 9092:9092
     volumes:
@@ -42,6 +48,8 @@ services:
     environment:
       ZK_HOSTS: "zookeeper:2181"
       APPLICATION_SECRET: "@dminP@ssw0rd"
+    networks:
+      backend:
     links:
       - zookeeper
       - kafka
@@ -106,7 +114,7 @@ services:
   mongo:
     image: mongo:3
     networks:
-      mongo:
+      backend:
     volumes:
       - mongo_data:/data/db
 
@@ -123,12 +131,12 @@ services:
       - GRAYLOG_WEB_ENDPOINT_URI=http://${HOST_IP}:9000/api
     networks:
       es:
-      mongo:
+      backend:
     links:
       - elasticsearch
       - mongo
-#      - zookeeper
-#      - kafka
+      - zookeeper
+      - kafka
     depends_on:
       - mongo
       - elasticsearch
@@ -149,4 +157,5 @@ volumes:
   esdata2:
 networks:
   es:
-  mongo:
+  backend:
+  
