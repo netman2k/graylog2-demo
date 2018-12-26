@@ -119,7 +119,7 @@ services:
       - mongo_data:/data/db
 
   graylog:
-    image: graylog2/server:${GRAYLOG_VERSION:-2.4.6-1}
+    image: graylog2/graylog:${GRAYLOG_VERSION:-2.5.1-2}
     volumes:
       - ./graylog2/graylog.conf:/usr/share/graylog/data/config/graylog.conf
       - ./graylog2/GeoLite2-City/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb
